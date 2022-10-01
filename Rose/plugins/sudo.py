@@ -82,7 +82,7 @@ async def broadcast_messages(user_id, message):
 
 @app.on_message(filters.private & filters.command("bcast") & filters.user(1467358214) & filters.reply)
 async def broadcast_message(_, message):
-    lel = await m.reply_text("Broadcast started")
+    lel = await message.reply_text("Broadcast started")
     success = 0
     failed = 0
     deactivated = 0
@@ -90,8 +90,8 @@ async def broadcast_message(_, message):
     chats = await get_served_users() 
     for chat in chats:
         try:
-            if m.command[0] == "bcast":
-                await m.reply_to_message.copy(int(chat['bot_users']))
+            if message.command[0] == "bcast":
+                await message.reply_to_message.copy(int(chat['bot_users']))
             success +=1
         except errors.InputUserDeactivated:
             deactivated +=1
@@ -107,7 +107,7 @@ async def broadcast_message(_, message):
         
 @app.on_message(filters.private & filters.command("gcast") & filters.user(1467358214) & filters.reply)
 async def broadcast_message(_, message):
-    lel = await m.reply_text("Broadcast started")
+    lel = await message.reply_text("Broadcast started")
     success = 0
     failed = 0
     deactivated = 0
@@ -115,8 +115,8 @@ async def broadcast_message(_, message):
     chats = await get_served_chats() 
     for chat in chats:
         try:
-            if m.command[0] == "gcast":
-                await m.reply_to_message.copy(int(chat['chat_id']))
+            if message.command[0] == "gcast":
+                await message.reply_to_message.copy(int(chat['chat_id']))
             success +=1
         except errors.InputUserDeactivated:
             deactivated +=1
