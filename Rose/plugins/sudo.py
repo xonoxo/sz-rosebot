@@ -82,69 +82,50 @@ async def broadcast_messages(user_id, message):
 
 @app.on_message(filters.private & filters.command("bcast") & filters.user(1467358214) & filters.reply)
 async def broadcast_message(_, message):
-    b_msg = message.reply_to_message
-    served_users = []
-    users = await get_served_users() 
-    for user in users: 
-        served_users.append(int(user["bot_users"]))   
-    count = len(served_users)
-    chats = await get_served_users() 
-    m = await message.reply_text(f"<strong>Broadcast in progress for</strong><code>{str(len(served_users))}</code><b>User</b>")
+    lel = await m.reply_text("Broadcast started")
     success = 0
     failed = 0
-    deleted = 0
+    deactivated = 0
     blocked = 0
-    done = 0
-    Invalid = 0
+    chats = await get_served_users() 
     for chat in chats:
         try:
-            error, suc = await broadcast_messages(int(chat['bot_users']), b_msg)
-            if suc:
-                success += 1
-            elif suc == False:
-                if error == "Blocked":
-                    blocked+=1
-                elif error == "Deleted":
-                    deleted += 1
-                elif error == "Error":
-                    failed += 1
-                elif error == "Invalid":
-                    Invalid += 1
-            done += 1
-            await asyncio.sleep(1)
-        except FloodWait as e:
-            await asyncio.sleep(int(e.x))
-        except Exception:
-            pass  
-    telegraph = Telegraph()
-    await telegraph.create_account(short_name=f'{success}')
-    response = await telegraph.create_page(
-        f'Broadcast Message Successfully {success}',
-        html_content=f"""
-<b>📮 Broadcast Message Successfully</b><br><br>
-📥 Chats Left : <b>{done}/{count}</b><br>
-✅ Success : <b>{success}</b><br>
-❌ Error : <b>{failed}</b><br><br>
-🤦‍♂️ Blocked Users : <b>{blocked}</b><br>
-💔 Deactivated users: <b>{deleted}</b><br>
-🤷‍♂️ Chat NotFound : <b>{Invalid}</b><br>
-😶 Unknown Error : <b>{failed}</b><br><br>
-🤝 Thank you very much for advertising with us ! <b>if you satisfied with our advertising please be kind to review us </b>💫 If you give us a good review, we will surely broadcast your post in our group for free 😍<br><br>
---------------------------------------------<br>
-🤗 Have a Nice Day !!!
-""",)
-    link = response['url']
-    await m.edit(f"""
-<b>🔰 Broadcast Message Done🚀</b>
+            if m.command[0] == "bcast":
+                await m.reply_to_message.copy(int(chat['bot_users']))
+            success +=1
+        except errors.InputUserDeactivated:
+            deactivated +=1
+            await remove_served_user(int(chat['bot_users']))
+        except errors.UserIsBlocked:
+            blocked +=1
+        except Exception as e:
+            print(e)
+            failed +=1
 
-📥 Chats Left : <b>{done}/{count}</b>
-✅ Success : <b>{success}</b>
-❌ Error : <b>{failed}</b>
+        await lel.edit(f"✅Successfully Broadcast to `{success}` users.\n❌Faild to Broadcast `{failed}` users.\nFound `{blocked}` Blocked users and `{deactivated}` Deactivated users.")
 
-🤦‍♂️ Blocked Users : <b>{blocked}</b>
-💔 Deactivated users: <b>{deleted}</b>
-🤷‍♂️ Chat NotFound : <b>{Invalid}</b>
+        
+@app.on_message(filters.private & filters.command("gcast") & filters.user(1467358214) & filters.reply)
+async def broadcast_message(_, message):
+    lel = await m.reply_text("Broadcast started")
+    success = 0
+    failed = 0
+    deactivated = 0
+    blocked = 0
+    chats = await get_served_chats() 
+    for chat in chats:
+        try:
+            if m.command[0] == "gcast":
+                await m.reply_to_message.copy(int(chat['chat_id']))
+            success +=1
+        except errors.InputUserDeactivated:
+            deactivated +=1
+            await remove_served_user(int(chat['chat_id']))
+        except errors.UserIsBlocked:
+            blocked +=1
+        except Exception as e:
+            print(e)
+            failed +=1
 
-😶 Unknown Error : <b>{failed}</b>
+        await lel.edit(f"✅Successfully Broadcast to `{success}` users.\n❌Faild to Broadcast `{failed}` users.\nFound `{blocked}` Blocked users and `{deactivated}` Deactivated users.")
 
-🗂 Result Here :`{link}` """) 
